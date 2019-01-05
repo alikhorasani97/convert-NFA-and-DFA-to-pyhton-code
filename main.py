@@ -11,6 +11,8 @@ class Node:
         self.nxtNode = {}
     def __copy__(self):
         return Node(copy.deepcopy(self.nameValue))
+    def __repr__(self):
+        return 'node ' + str(self.nameValue )
 
 
 class stateMachine:
@@ -23,7 +25,6 @@ class stateMachine:
         self.rootNode = copy.copy(headnode)
         self.Nodes = {}
         self.Nodes[str(self.rootNode.nameValue)] = self.rootNode
-        print(self.Nodes[str(self.rootNode.nameValue)].nameValue)
     def addNode(self,parentname,transformchar,newnamenode):
         newnode = Node(newnamenode)
         self.Nodes[str(newnamenode)] = newnode
@@ -59,24 +60,34 @@ class problem:
         self.acceptNodes = [self.statemachine.Nodes[str(self.statemachine.rootNode.nameValue)]]
 
     def isInLanguage(self,string):
-        if (type(string) is not str()):
+        if (type(string) is not str):
             raise Exception("input of isInLanguage function must be string type")
-
+        for i in range(len(string)):
+            if not (self.checkCharacter(string[i])):
+                return False
+        return True
 
     def checkCharacter(self,charctr):
-        if ((type(charctr) is not str) or charctr.__len__ != 1):
+        if ((type(charctr) is not str) or len(charctr) != 1):
             raise Exception("charctr must be string type whit lenght 1")  # check to be a character for nfa and dfa
         # curNode = self.acceptNodes.pop()
         tempnodes = copy.deepcopy(self.acceptNodes)
+        self.acceptNodes[:] = []
+        visitedNodes = []
         for node in tempnodes:
-            for nxnode in node.nxtNode[str('eps')]:
-                if self.statemachine.Nodes[str(nxnode)] in tempnodes:
-                    continue
-                tempnodes.append(self.statemachine.Nodes[str(nxnode)])
-            for nxnode in node.nxtNode[str(charctr)]:
-                if self.statemachine.Nodes[str(nxnode)] in tempnodes:
-                    continue
-                self.acceptNodes.append(self.statemachine.Nodes[str(nxnode)])
+            if 'e' in node.nxtNode:
+                for nxnode in node.nxtNode['e']:
+                    if (self.statemachine.Nodes[str(nxnode)] in tempnodes) or (nxnode in visitedNodes) :
+                        continue
+                    tempnodes.append(self.statemachine.Nodes[str(nxnode)])
+            if str(charctr) in node.nxtNode:
+                for nxnode in node.nxtNode[str(charctr)]:
+                    if self.statemachine.Nodes[str(nxnode)] in tempnodes:
+                        continue
+                    self.acceptNodes.append(self.statemachine.Nodes[str(nxnode)])
+                visitedNodes.append(node.nameValue)
+                tempnodes.pop()
+        return bool(self.acceptNodes.__len__())
 
 
 
@@ -89,4 +100,6 @@ language1.statemachine.addNode(6,0,7)
 language1.statemachine.addNode(6,1,8)
 language1.statemachine.addEdge(5,'1',8)
 language1.statemachine.addEdge(5,'0',7)
-print(language1.statemachine.Nodes[str(5)].nxtNode)
+print(a)
+print(language1.isInLanguage('11'))
+print(language1.acceptNodes)
